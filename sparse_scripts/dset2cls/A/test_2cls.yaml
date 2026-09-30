@@ -1,0 +1,7 @@
+path: C:/anyoneai/final/missing-geo/dset2cls
+train: test_2cls/images
+val: test_2cls/images
+test: test_2cls/images
+nc: 2
+names: [object, missing]
+
