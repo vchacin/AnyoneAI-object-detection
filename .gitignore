@@ -1,7 +1,8 @@
 # Datos y artefactos pesados
 data_pipeline/dataset_sku110k/
 data_pipeline/revision_imagenes.txt
-training/weights/
+training/weights/yolo26s.pt
+training/weights/yolo26n.pt
 training/reports/
 labeling/export_empty_class/out/
 api/data/
