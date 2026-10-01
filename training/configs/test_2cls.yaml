@@ -1,0 +1,8 @@
+path: C:/Users/Asus/Documents/AnyoneAI/Final Project/AnyoneAI-object-detection/data_pipeline/dataset_sku110k/yolo/train_armB
+train: images
+val: images
+test: images
+nc: 2
+names:
+- object
+- missing

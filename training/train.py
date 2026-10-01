@@ -1,9 +1,11 @@
-"""Entrena y evalua un brazo (A=object-only, B=object+missing) a N epocas.
+"""Entrena y evalúa un brazo (A=object-only, B=object+missing) durante N épocas.
 
-A: nc=1, val en test_obj.  B: nc=2, val en test_2cls (object + missing).
-Config del POC: yolo26s, imgsz 1024, seed 42, batch 1, max_det 750.
+Brazo A: nc=1, validación en test_obj.  Brazo B: nc=2, validación en
+test_2cls (object + missing).
+Configuración del POC: yolo26s, imgsz 1024, seed 42, batch 1, max_det 750.
 
-  experiment/.venv/Scripts/python.exe run_ab.py --which A --epochs 20
+  python training/train.py --which A --epochs 35
+  python training/train.py --which B --epochs 35 --batch 8
 """
 from __future__ import annotations
 
@@ -12,11 +14,10 @@ import json
 import time
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
-FINAL = ROOT.parent
-DSET = ROOT / "dset2cls"
-OUT = ROOT / "out" / "ab"
-WEIGHTS = FINAL / "yolo26s.pt"
+ROOT = Path(__file__).resolve().parent.parent
+CONFIGS = ROOT / "training" / "configs"
+OUT = ROOT / "training" / "weights"
+WEIGHTS = ROOT / "training" / "weights" / "yolo26s.pt"
 
 
 def tolist(x):
@@ -30,25 +31,24 @@ def run(which: str, epochs: int, batch: int = 1, dset: Path | None = None,
         workers: int = 0, patience: int = 100, resume: bool = False,
         init: Path | None = None, name: str | None = None,
         lr0: float | None = None):
-    dset = dset or DSET
-    data = dset / which / "data.yaml"
-    test = DSET / ("test_obj.yaml" if which == "A" else "test_2cls.yaml")
-    name = name or (f"{which}_e{epochs}" if dset == DSET
-                    else f"{which}_big_e{epochs}")
+    dset = dset or CONFIGS
+    data = dset / (f"data_arm_{which.lower()}.yaml" if which else "data.yaml")
+    test = dset / ("test_obj.yaml" if which == "A" else "test_2cls.yaml")
+    name = name or f"{which}_e{epochs}"
     OUT.mkdir(parents=True, exist_ok=True)
 
     from ultralytics import YOLO
 
     started = time.perf_counter()
     last = OUT / name / "weights" / "last.pt"
-    # init: continua desde otros pesos (nueva run); resume: mismo run de ultralytics
+     # init: continúa desde otros pesos (nueva run); resume: misma run de ultralytics
     model = YOLO(str(init if init else (last if resume and last.exists()
                                         else WEIGHTS)))
     model.train(data=str(data), epochs=epochs, imgsz=1024, seed=42, batch=batch,
                 workers=workers, max_det=750, patience=patience,
                 resume=resume and not init and last.exists(),
                 project=str(OUT), name=name, exist_ok=True,
-                # optimizer=auto ignora lr0; si lo pido explicito, respétalo
+                 # optimizer=auto ignora lr0; si se especifica explícitamente, respetarlo
                 **({"lr0": lr0, "optimizer": "SGD"} if lr0 else {}))
     best = str(Path(model.trainer.best))
 
@@ -83,16 +83,16 @@ def main():
     ap.add_argument("--epochs", type=int, default=20)
     ap.add_argument("--batch", type=int, default=1)
     ap.add_argument("--dset", type=Path, default=None,
-                    help="raiz alternativa del dataset (default: dset2cls)")
+                    help="raiz alternativa de los configs (default: training/configs)")
     ap.add_argument("--workers", type=int, default=0)
     ap.add_argument("--patience", type=int, default=100,
                     help="early stopping sin mejora (100 = off)")
     ap.add_argument("--resume", action="store_true",
                     help="reanuda desde weights/last.pt del mismo name")
     ap.add_argument("--init", type=Path, default=None,
-                    help="pesos iniciales (correra nueva que continua otros)")
+                    help="pesos iniciales (inicia una nueva run que continúa otros pesos)")
     ap.add_argument("--name", type=str, default=None,
-                    help="nombre de run (default: A_big_e<epochs>)")
+                    help="nombre de run (default: <A|B>_e<epochs>)")
     ap.add_argument("--lr0", type=float, default=None,
                     help="lr inicial (usar < 0.01 al continuar pesos)")
     a = ap.parse_args()

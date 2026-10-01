@@ -1,0 +1,36 @@
+# Datos y artefactos pesados
+data_pipeline/dataset_sku110k/
+data_pipeline/revision_imagenes.txt
+training/weights/
+training/reports/
+labeling/export_empty_class/out/
+api/data/
+out/
+
+# Entorno virtual
+.venv/
+venv/
+env/
+
+# Configuración local (credenciales)
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Editores / Sistema operativo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Colab
+*.ipynb_checkpoints
+/content/

@@ -1,6 +1,0 @@
-# Reporte de imágenes corruptas
-C:\anyoneai\final\dset\SKU110K_fixed\images\test_274.jpg | Error: image file is truncated (14 bytes not processed)
-C:\anyoneai\final\dset\SKU110K_fixed\images\train_4222.jpg | Error: image file is truncated (23 bytes not processed)
-C:\anyoneai\final\dset\SKU110K_fixed\images\train_5822.jpg | Error: broken data stream when reading image file
-C:\anyoneai\final\dset\SKU110K_fixed\images\train_882.jpg | Error: image file is truncated (3 bytes not processed)
-C:\anyoneai\final\dset\SKU110K_fixed\images\train_924.jpg | Error: image file is truncated (10 bytes not processed)

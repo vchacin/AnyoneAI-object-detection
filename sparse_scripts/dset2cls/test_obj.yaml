@@ -1,7 +1,0 @@
-path: C:/anyoneai/final/missing-geo/dset2cls
-train: test_obj/images
-val: test_obj/images
-test: test_obj/images
-nc: 1
-names: [object]
-

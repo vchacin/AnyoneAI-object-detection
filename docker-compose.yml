@@ -1,0 +1,26 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      API_KEY: ${API_KEY:-}
+      DATABASE_URL: sqlite:////app/api/data/detections.db
+      INFERENCE_WEIGHTS: /app/training/weights/best.pt
+      INFERENCE_CONF: ${INFERENCE_CONF:-0.25}
+      GAP_AUTO_SCORE: ${GAP_AUTO_SCORE:-0.5}
+    volumes:
+      - ./training/weights:/app/training/weights:ro
+      - api-data:/app/api/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request;urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  api-data:

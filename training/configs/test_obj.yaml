@@ -1,0 +1,7 @@
+path: C:/Users/Asus/Documents/AnyoneAI/Final Project/AnyoneAI-object-detection/data_pipeline/dataset_sku110k/yolo/train
+train: images
+val: images
+test: images
+nc: 1
+names:
+- object

@@ -1,0 +1,8 @@
+path: C:/Users/Asus/AppData/Local/Temp/smoke_2y1tgq84/yolo/train_armB
+train: images
+val: images
+test: images
+nc: 2
+names:
+- object
+- missing

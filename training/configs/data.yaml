@@ -1,0 +1,12 @@
+﻿# Arm A: deteccio de producto (nc=1).
+#
+# Plantilla base. `export_empty_class.py` y `training/pipeline_completo.ipynb`
+# lo regeneran con la ruta absoluta del dataset, ya que Ultralytics resuelve un
+# `path` relativo contra la carpeta del propio yaml (training/configs/), no
+# contra la raiz del repo.
+path: ../../data_pipeline/dataset_sku110k/yolo/train
+train: images
+val: images
+test: images
+nc: 1
+names: [object]
