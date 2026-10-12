@@ -4,7 +4,7 @@ Sencillo a proposito: el endpoint de inferencia se protege con `X-API-Key`.
 La clave se lee de la variable de entorno `API_KEY`. Sin `API_KEY` definida el
 servicio arranca abierto (util para desarrollo local) pero lo avisa por log.
 
-  uvicorn api.main:app --reload
+    uvicorn app.backend.main:app --reload
   curl -H "X-API-Key: $API_KEY" -F "file=@foto.jpg" http://localhost:8000/predict
 """
 from __future__ import annotations

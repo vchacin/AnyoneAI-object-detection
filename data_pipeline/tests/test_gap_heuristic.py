@@ -1,15 +1,16 @@
 """Tests de la heurística geométrica de huecos.
 
-No requieren GPU ni Ultralytics: `api/gap_heuristic.py` es geometría pura.
+No requieren GPU ni Ultralytics: `app/backend/services/gap_heuristic.py` es geometría pura.
   pytest data_pipeline/tests/ -v
 """
 import numpy as np
 import pytest
 
-from api.gap_heuristic import (AUTO_SCORE, appearance, center_in,
-                               drop_occluded, group_rows, iou, overlaps_object,
-                               predict_missing, row_pitch, row_slots,
-                               score_candidates, theilsen)
+from app.backend.services.gap_heuristic import (AUTO_SCORE, appearance, center_in,
+                                                drop_occluded, group_rows, iou,
+                                                overlaps_object, predict_missing,
+                                                row_pitch, row_slots,
+                                                score_candidates, theilsen)
 
 
 # ---------------------------------------------------------------- filas

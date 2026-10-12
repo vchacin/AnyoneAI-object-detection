@@ -1,0 +1,1 @@
+"""Contratos futuros de empleados vinculables opcionalmente a usuarios.""

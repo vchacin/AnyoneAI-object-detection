@@ -5,7 +5,7 @@ píxeles y devuelve cajas candidatas de producto faltante. Es la única fuente d
 verdad de la heurística y es compartida por:
 
   - `labeling/generate_missing_labels.py`  (etiquetado offline → entrenamiento)
-  - `api/inference.py`                     (serving en producción)
+    - `app/backend/services/inference_service.py` (serving en producción)
 
 Estrategia: los productos de una repisa se apoyan en el mismo estante, por lo
 que `y2` es un ancla estable para agruparlos en filas. Dentro de cada fila, el

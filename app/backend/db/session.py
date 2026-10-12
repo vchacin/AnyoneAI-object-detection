@@ -18,8 +18,8 @@ from sqlalchemy import (JSON, Column, DateTime, Float, Integer, String,
                         create_engine)
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_DB = ROOT / "api" / "data" / "detections.db"
+ROOT = Path(__file__).resolve().parents[3]
+DEFAULT_DB = ROOT / "app" / "data" / "detections.db"
 DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite:///{DEFAULT_DB.as_posix()}")
 
 Base = declarative_base()

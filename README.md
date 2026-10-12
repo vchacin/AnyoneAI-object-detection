@@ -4,7 +4,7 @@ Detección de producto faltante en estanterías de retail sobre SKU-110K.
 
 Monolito modular: un repositorio, un despliegue. El pipeline de ML se ejecuta en
 un notebook que funciona igual en Colab (GPU) y en local (CPU/GPU). La heurística
-geométrica de huecos (`api/gap_heuristic.py`) es la fuente de verdad compartida
+geométrica de huecos (`app/backend/services/gap_heuristic.py`) es la fuente de verdad compartida
 entre el etiquetado offline y el serving.
 
 ## Estructura
@@ -32,7 +32,10 @@ entre el etiquetado offline y el serving.
 │   ├── weights/                  # .pt y runs (gitignored)
 │   └── reports/                  # métricas y overlays (gitignored)
 │
-├── api/                       # Servicio FastAPI
+├── app/
+│   ├── backend/               # Servicio FastAPI e infraestructura SDD
+│   └── frontend/.gitkeep      # Reservado para la interfaz futura
+├── modelos/                   # Checkpoint oficial de master
 │   ├── main.py                  # endpoints
 │   ├── inference.py             # carga del modelo + predicción
 │   ├── gap_heuristic.py         # heurística geométrica (fuente de verdad)
@@ -56,7 +59,7 @@ entre el etiquetado offline y el serving.
 El etiquetado de `missing` no es manual: `labeling/generate_missing_labels.py`
 agrupa los productos en repisas, mide el *pitch* (ancho mediano de producto) y
 propone como hueco todo espacio de ~1 producto. La misma heurística
-(`api/gap_heuristic.py`) que genera las etiquetas se ejecuta en la API, de modo
+(`app/backend/services/gap_heuristic.py`) que genera las etiquetas se ejecuta en la API, de modo
 que lo validado offline es exactamente lo que se sirve.
 
 ## Inicio rápido
@@ -104,9 +107,10 @@ automáticamente. Las credenciales AWS se leen de `.env` en la raíz del reposit
 ### 4. API
 
 ```bash
-uvicorn api.main:app --reload
-# http://localhost:8000        interfaz web
-# http://localhost:8000/docs   OpenAPI / Swagger
+uvicorn app.backend.main:app --reload
+# http://localhost:8000                 interfaz web
+# http://localhost:8000/api/v1/health   estado del servicio
+# http://localhost:8000/docs            OpenAPI / Swagger
 ```
 
 Con Docker:
@@ -173,9 +177,9 @@ y robustez del ajuste Theil-Sen. 23 tests, 0.1s, no requieren GPU ni datos.
 | Datos / EDA | `data_pipeline/` |
 | Etiquetado | `labeling/` |
 | Entrenamiento | `training/` |
-| Servicio | `api/`, `docker-compose.yml` |
+| Servicio | `app/backend/`, `docker-compose.yml` |
 | Orquestación | `training/pipeline_completo.ipynb` |
-| Heurística (fuente de verdad) | `api/gap_heuristic.py` |
+| Heurística (fuente de verdad) | `app/backend/services/gap_heuristic.py` |
 
 ## Documentación técnica
 

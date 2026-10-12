@@ -1,0 +1,1 @@
+"""Router futuro de health público para disponibilidad del backend, base de datos y modelo.""

@@ -1,5 +1,5 @@
 """Configuración de pytest: hace importable la raíz del repositorio para que
-`api.gap_heuristic` resuelva sin instalar el paquete.
+`app.backend.services.gap_heuristic` resuelva sin instalar el paquete.
 
   pytest data_pipeline/tests/ -v
   pytest -q              (desde la raíz del repositorio)

@@ -1,0 +1,1 @@
+"""Pruebas futuras del contrato /api/v1/inference, imagen inválida, bbox original y source.""

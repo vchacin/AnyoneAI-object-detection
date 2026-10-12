@@ -5,7 +5,8 @@ agrupa en repisas, mide el pitch y propone huecos de ~1 producto de ancho. No
 requiere un modelo de detección entrenado; opcionalmente utiliza un detector
 COCO (yolo26n.pt) para descartar candidatos tapados por personas.
 
-La heurística reside en `api/gap_heuristic.py` y es compartida con la API.
+La heurística reside en `app/backend/services/gap_heuristic.py` y es compartida
+con la API.
 
 Ejecución (venv del repositorio):
 
@@ -34,7 +35,9 @@ if str(ROOT) not in sys.path:
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-from api.gap_heuristic import AUTO_SCORE, OCCLUDERS, score_candidates  # noqa: E402
+from app.backend.services.gap_heuristic import (  # noqa: E402
+    AUTO_SCORE, OCCLUDERS, score_candidates,
+)
 
 DEFAULT_COCO_WEIGHTS = ROOT / "training" / "weights" / "yolo26n.pt"
 
@@ -151,7 +154,8 @@ def run(sources, out_dir, model=None, auto_score=AUTO_SCORE):
         occluders = coco_occluders(model, s["path"]) if model is not None else None
         cands = score_candidates(gray, s["boxes"], auto_score, occluders)
         for c in cands:
-            rows.append([s["stem"], *c["box"], "missing", s["w"], s["h"]])
+            if c["auto"]:
+                rows.append([s["stem"], *c["box"], "missing", s["w"], s["h"]])
         cv2.imwrite(str(out_dir / "overlays" / f'{s["stem"]}.jpg'),
                     draw_overlay(s["image"], s["boxes"], cands))
         try:
@@ -176,7 +180,10 @@ def run(sources, out_dir, model=None, auto_score=AUTO_SCORE):
     summary = {
         "images": len(sources),
         "objects": sum(len(s["boxes"]) for s in sources),
-        "candidates": len(rows),
+        "candidates": sum(len(img["candidates"]) for img in manifest["images"]),
+        "rejected": sum(len(img["candidates"]) for img in manifest["images"]
+                if img["candidates"])
+                   - len(rows),
         "auto_accepted": sum(1 for img in manifest["images"]
                              for c in img["candidates"] if c["auto"]),
         "auto_score": auto_score,

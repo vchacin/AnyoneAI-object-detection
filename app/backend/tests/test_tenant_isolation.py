@@ -1,0 +1,1 @@
+"""Pruebas futuras de aislamiento por store_id y matriz de permisos.""

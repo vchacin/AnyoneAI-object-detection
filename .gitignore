@@ -5,8 +5,9 @@ training/weights/yolo26s.pt
 training/weights/yolo26n.pt
 training/reports/
 labeling/export_empty_class/out/
-api/data/
+app/data/
 out/
+docs/
 
 # Entorno virtual
 .venv/

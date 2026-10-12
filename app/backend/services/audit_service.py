@@ -1,0 +1,1 @@
+"""Servicio futuro de auditoría para registrar acciones administrativas en audit_log (RF-17).""

@@ -1,0 +1,1 @@
+"""Pruebas futuras de token visible una vez, hash persistido, rotación e invalidez del anterior.""

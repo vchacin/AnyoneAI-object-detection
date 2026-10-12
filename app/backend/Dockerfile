@@ -1,5 +1,5 @@
 # Imagen de la API de deteccion. El repo se copia completo para que
-# `api.gap_heuristic` sea importable como paquete (`api.*`).
+# `app.backend.services.gap_heuristic` sea importable como paquete.
 FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -18,8 +18,9 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # Los pesos son el unico artifact pesado; se montan como volumen en compose.
-ENV INFERENCE_WEIGHTS=/app/training/weights/best.pt
+ENV MODEL_PATH=/models/best.pt \
+    INFERENCE_WEIGHTS=/models/best.pt
 
 EXPOSE 8000
 
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.backend.main:app", "--host", "0.0.0.0", "--port", "8000"]

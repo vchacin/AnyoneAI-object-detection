@@ -1,0 +1,1 @@
+"""Router futuro de alertas por tienda y transiciones de estado para roles autorizados.""

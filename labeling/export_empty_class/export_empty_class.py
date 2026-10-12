@@ -2,7 +2,7 @@
 
 - **Brazo A** (`nc=1`, solo `object`): listo para el detector base de productos.
 - **Brazo B** (`nc=2`, `object` + `missing`): añade las cajas de hueco generadas
-  por la heurística geométrica (`api/gap_heuristic.py`).
+    por la heurística geométrica (`app/backend/services/gap_heuristic.py`).
 
 Escribe un `data.yaml` por brazo en `training/configs/` apuntando a la ruta
 absoluta del dataset, de modo que funcione igual en Colab y en local sin

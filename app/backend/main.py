@@ -1,13 +1,13 @@
 """Servicio FastAPI para la deteccion de producto faltante en retail.
 
 Endpoints:
-  GET  /            -> interfaz estatica (api/static/index.html)
-  GET  /health      -> estado del servicio y del modelo
-  POST /predict     -> deteccion de productos y huecos en una imagen
-  GET  /detections  -> historico de imagenes procesadas
+    GET  /            -> interfaz estatica (app/backend/static/index.html)
+    GET  /api/v1/health -> estado del servicio y del modelo
+    POST /api/v1/inference -> deteccion de productos y huecos en una imagen
+    GET  /api/v1/detections -> historico de imagenes procesadas
 
 Arranque:
-  uvicorn api.main:app --reload
+    uvicorn app.backend.main:app --reload
   docker compose up --build
 """
 from __future__ import annotations
@@ -24,11 +24,11 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from . import db
-from .auth import get_api_key, require_auth
-from .inference import get_detector
+from .core.security import get_api_key, require_auth
+from .db import session as db
+from .services.inference_service import get_detector
 
-logger = logging.getLogger("api.main")
+logger = logging.getLogger("app.backend.main")
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "15"))
@@ -55,6 +55,8 @@ class PredictResponse(BaseModel):
     conf: float
     auto_score: float
     used_coco: bool
+    model_version: str
+    detections: list
     detection_id: int | None = None
 
 
@@ -80,9 +82,10 @@ def index():
     return FileResponse(index_file)
 
 
-@app.get("/health", response_model=HealthResponse)
+@app.get("/api/v1/health", response_model=HealthResponse)
+@app.get("/health", response_model=HealthResponse, include_in_schema=False)
 def health() -> HealthResponse:
-    from .inference import model_loaded
+    from .services.inference_service import model_loaded
 
     return HealthResponse(
         status="ok",
@@ -92,13 +95,20 @@ def health() -> HealthResponse:
     )
 
 
-@app.post("/predict", response_model=PredictResponse, dependencies=[require_auth])
+@app.post("/api/v1/inference", response_model=PredictResponse,
+          dependencies=[require_auth])
+@app.post("/predict", response_model=PredictResponse,
+          dependencies=[require_auth], include_in_schema=False)
 def predict(
-    file: UploadFile = File(...),
+    image: UploadFile | None = File(default=None),
+    file: UploadFile | None = File(default=None),
     persist: bool = True,
     session: Session = Depends(db.get_session),
 ) -> PredictResponse:
-    raw = file.file.read()
+    upload = image or file
+    if upload is None:
+        raise HTTPException(status_code=422, detail="Falta el campo image")
+    raw = upload.file.read()
     if not raw:
         raise HTTPException(status_code=400, detail="Archivo vacio")
     if len(raw) > MAX_UPLOAD_MB * 1024 * 1024:
@@ -121,7 +131,7 @@ def predict(
     detection_id = None
     if persist:
         try:
-            row = db.save_detection(session, image_name=file.filename or "upload",
+            row = db.save_detection(session, image_name=upload.filename or "upload",
                                     result=result, model_weights=str(detector.weights))
             detection_id = row.id
         except Exception as exc:  # noqa: BLE001 - persistencia no bloquea la prediccion
@@ -129,7 +139,7 @@ def predict(
             logger.warning("No se pudo guardar la deteccion: %s", exc)
 
     return PredictResponse(
-        image_name=file.filename or "upload",
+        image_name=upload.filename or "upload",
         width=width, height=height,
         n_objects=len(result["objects"]),
         n_missing=len(result["missing"]),
@@ -139,11 +149,14 @@ def predict(
         conf=result["conf"],
         auto_score=result["auto_score"],
         used_coco=result["used_coco"],
+        model_version=result["model_version"],
+        detections=result["detections"],
         detection_id=detection_id,
     )
 
 
-@app.get("/detections", dependencies=[require_auth])
+@app.get("/api/v1/detections", dependencies=[require_auth])
+@app.get("/detections", dependencies=[require_auth], include_in_schema=False)
 def list_detections(limit: int = 50, session: Session = Depends(db.get_session)):
     rows = session.query(db.Detection).order_by(db.Detection.id.desc()) \
         .limit(min(limit, 500)).all()

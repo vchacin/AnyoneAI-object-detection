@@ -1,0 +1,1 @@
+"""Contratos futuros de turnos con weekday, start_time y end_time.""

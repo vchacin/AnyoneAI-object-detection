@@ -1,26 +1,59 @@
 services:
-  api:
+  backend:
     build:
       context: .
-      dockerfile: api/Dockerfile
+      dockerfile: app/backend/Dockerfile
     ports:
       - "8000:8000"
     environment:
       API_KEY: ${API_KEY:-}
-      DATABASE_URL: sqlite:////app/api/data/detections.db
-      INFERENCE_WEIGHTS: /app/training/weights/best.pt
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://postgres:postgres@db:5432/object_detection}
+      MODEL_PATH: ${MODEL_PATH:-/models/best.pt}
+      INFERENCE_WEIGHTS: ${INFERENCE_WEIGHTS:-/models/best.pt}
       INFERENCE_CONF: ${INFERENCE_CONF:-0.25}
       GAP_AUTO_SCORE: ${GAP_AUTO_SCORE:-0.5}
+      DEFAULT_CONF: ${DEFAULT_CONF:-0.25}
+      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-http://minio:9000}
+      S3_BUCKET: ${S3_BUCKET:-inspections}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-minioadmin}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-minioadmin}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      JWT_SECRET: ${JWT_SECRET:-development-only-change-me}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
     volumes:
-      - ./training/weights:/app/training/weights:ro
-      - api-data:/app/api/data
+      - ./modelos:/models:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c",
-             "import urllib.request;urllib.request.urlopen('http://localhost:8000/health')"]
+             "import urllib.request;urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
       interval: 30s
       timeout: 5s
       retries: 3
 
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: object_detection
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio-data:/data
+    profiles: [dev]
+
+  # frontend:
+  #   build: ./app/frontend
+  #   depends_on: [backend]
+
 volumes:
-  api-data:
+  postgres-data:
+  minio-data:
