@@ -1,5 +1,6 @@
 # Datos y artefactos pesados
 data_pipeline/dataset_sku110k/
+data_pipeline/hard_examples/
 data_pipeline/revision_imagenes.txt
 training/weights/yolo26s.pt
 training/weights/yolo26n.pt
@@ -7,7 +8,13 @@ training/reports/
 labeling/export_empty_class/out/
 app/data/
 out/
-docs/
+
+# Pesos locales de ShelfVision (no versionados, solo para comparacion)
+modelos/shelfvision/
+
+# Credenciales: nunca deben entrar en el repositorio
+*.pem
+*.key
 
 # Entorno virtual
 .venv/

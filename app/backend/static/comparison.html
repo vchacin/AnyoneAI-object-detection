@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comparacion visual de modelos</title>
+<style>
+  :root { color-scheme: dark; --bg:#0f1115; --panel:#171c23; --line:#2a333f; --muted:#929baa; --accent:#f2b84b; }
+  * { box-sizing:border-box; } body { margin:0; background:var(--bg); color:#eef1f5; font:15px/1.45 system-ui,sans-serif; }
+  main { max-width:1500px; margin:auto; padding:1.2rem; } header { display:flex; justify-content:space-between; gap:1rem; align-items:end; margin-bottom:1rem; }
+  h1 { margin:0; font-size:1.35rem; } p { color:var(--muted); margin:.2rem 0 0; }
+  select, textarea, button { background:#10141a; color:#eef1f5; border:1px solid var(--line); border-radius:6px; padding:.55rem .7rem; }
+  button { cursor:pointer; font-weight:600; } button.primary { background:var(--accent); color:#151515; border-color:var(--accent); }
+  .toolbar { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; } .progress { color:var(--muted); }
+  .boards { display:grid; grid-template-columns:1fr 1fr; gap:1rem; } .board { background:var(--panel); border:1px solid var(--line); padding:.7rem; border-radius:8px; }
+  .board h2 { font-size:1rem; margin:.1rem 0 .5rem; } img { width:100%; display:block; background:#080a0d; border-radius:5px; aspect-ratio:4/3; object-fit:contain; }
+  .meta { display:flex; gap:1rem; color:var(--muted); font-size:.82rem; margin-top:.45rem; } .review { margin-top:1rem; display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; }
+  textarea { min-width:280px; min-height:38px; } .hint { color:var(--muted); font-size:.82rem; }
+  @media(max-width:800px){.boards{grid-template-columns:1fr;} header{align-items:start;flex-direction:column;}}
+</style></head>
+<body><main>
+<header><div><h1>Revision visual de modelos</h1><p>Misma imagen, dos resultados. Marca cual representa mejor la escena.</p></div><div class="toolbar"><label>Corrida <select id="runs"></select></label><span class="progress" id="progress">Sin cargar</span></div></header>
+<section class="boards"><article class="board"><h2>Modelo oficial</h2><img id="official" alt="Resultado oficial"><div class="meta" id="officialMeta"></div></article><article class="board"><h2>ShelfVision</h2><img id="shelfvision" alt="Resultado ShelfVision"><div class="meta" id="shelfvisionMeta"></div></article></section>
+<section class="review"><button id="previous">Anterior</button><button id="next">Siguiente</button><button class="primary" data-verdict="official">Gana oficial</button><button class="primary" data-verdict="shelfvision">Gana ShelfVision</button><button data-verdict="tie">Empate</button><button data-verdict="unclear">No claro</button><textarea id="note" placeholder="Nota opcional"></textarea><span class="hint">Atajos: ←/→ navegar, 1 oficial, 2 ShelfVision, 3 empate, 4 no claro</span></section>
+</main><script>
+const $=id=>document.getElementById(id); let manifest=null, current=0, reviewed=new Set();
+async function loadRuns(){const data=await fetch('/api/v1/comparisons').then(r=>r.json()); $('runs').innerHTML=data.runs.map(r=>`<option value="${r.run_id}">${r.run_id} (${r.processed_count})</option>`).join(''); if(data.runs.length) await loadManifest(data.runs[0].run_id);}
+async function loadManifest(id){manifest=await fetch(`/api/v1/comparisons/${id}/manifest`).then(r=>r.json()); current=0; reviewed=new Set(); render();}
+function meta(value){const c=value.confidence||{}; const o=c.objects||{}; return `${value.objects} productos · ${value.missing} faltantes · ${value.timings.total_ms} ms · umbral ${c.threshold??'—'} · mediana obj ${o.median??'—'}`;}
+function render(){const e=manifest.entries[current]; const base=`/comparison-data/${manifest.run_id}/`; $('official').src=base+e.official_image; $('shelfvision').src=base+e.shelfvision_image; $('officialMeta').textContent=meta(e.official); $('shelfvisionMeta').textContent=meta(e.shelfvision); $('progress').textContent=`${current+1} / ${manifest.entries.length} · ${e.image_name}`; $('note').value='';}
+async function review(verdict){const e=manifest.entries[current]; await fetch(`/api/v1/comparisons/${manifest.run_id}/review`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({index:e.index,verdict,note:$('note').value})}); reviewed.add(e.index); if(current<manifest.entries.length-1){current++;render();}}
+$('runs').onchange=e=>loadManifest(e.target.value); $('previous').onclick=()=>{current=Math.max(0,current-1);render()}; $('next').onclick=()=>{current=Math.min(manifest.entries.length-1,current+1);render()}; document.querySelectorAll('[data-verdict]').forEach(b=>b.onclick=()=>review(b.dataset.verdict)); document.onkeydown=e=>{if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return; if(e.key==='ArrowLeft')$('previous').click(); if(e.key==='ArrowRight')$('next').click(); if(e.key==='1')review('official'); if(e.key==='2')review('shelfvision'); if(e.key==='3')review('tie'); if(e.key==='4')review('unclear');}; loadRuns();
+</script></body></html>

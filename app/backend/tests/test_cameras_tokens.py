@@ -1,1 +1,1 @@
-"""Pruebas futuras de token visible una vez, hash persistido, rotación e invalidez del anterior.""
+"""Placeholder tests for camera token visibility, hashing, rotation and revocation."""

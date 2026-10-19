@@ -1,0 +1,44 @@
+{
+  "active": "yolo26s-b8k_geo3k_e100",
+  "models": {
+    "yolo26s-b8k_geo3k_e100": {
+      "path": "modelos/best.pt",
+      "sha256": "f8a0740c3ba70a386fd3a87dc06a2bfb3ac639886b48d388521cb735e566b7c1",
+      "size_bytes": 20295365,
+      "classes": {
+        "0": "object",
+        "1": "missing"
+      },
+      "nc": 2,
+      "task": "detect",
+      "imgsz": 640,
+      "max_det": 750,
+      "ultralytics_version": "8.4.170",
+      "default_conf": 0.25,
+      "source": "origin/master@be7936e",
+      "notes": "2-class detector: {0: object, 1: missing}; trained dataset8k_geo/data_3k.yaml"
+    },
+    "yolo26s-b8k_geo3k_e100-onnx": {
+      "path": "modelos/best.onnx",
+      "sha256": "03f24f190d641a445a8ea3b85283fd8bfcee95e88791e0b1142a0ec4cb7037cf",
+      "size_bytes": 38142528,
+      "format": "onnx"
+    },
+    "yolo26s-B_e35": {
+      "path": "training/weights/B_e35/weights/best.pt",
+      "sha256": "f023d9971a82ad568acaca6df2ab43b5321e51c2d48d5a5e047632f82d850e31",
+      "size_bytes": 20334462,
+      "classes": {
+        "0": "object",
+        "1": "missing"
+      },
+      "nc": 2,
+      "task": "detect",
+      "imgsz": 640,
+      "max_det": 750,
+      "ultralytics_version": "8.4.170",
+      "source": "legacy",
+      "notes": "Predecessor checkpoint kept for rollback/comparison only."
+    }
+  }
+}

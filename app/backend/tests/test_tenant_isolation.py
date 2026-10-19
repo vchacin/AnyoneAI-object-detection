@@ -1,1 +1,1 @@
-"""Pruebas futuras de aislamiento por store_id y matriz de permisos.""
+"""Placeholder tests for store_id isolation and the permission matrix."""

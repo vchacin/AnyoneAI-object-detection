@@ -1,1 +1,1 @@
-"""Pruebas futuras de creación de alertas por gap_threshold y ciclo de vida.""
+"""Placeholder tests for alert creation by gap_threshold and lifecycle."""

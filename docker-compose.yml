@@ -8,10 +8,20 @@ services:
     environment:
       API_KEY: ${API_KEY:-}
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://postgres:postgres@db:5432/object_detection}
+      MODEL_MANIFEST: ${MODEL_MANIFEST:-/app/modelos/manifest.json}
+      MODEL_ROOT: ${MODEL_ROOT:-/models}
       MODEL_PATH: ${MODEL_PATH:-/models/best.pt}
       INFERENCE_WEIGHTS: ${INFERENCE_WEIGHTS:-/models/best.pt}
+      MODEL_NAME: ${MODEL_NAME:-yolo26s-b8k_geo3k_e100}
+      DEFAULT_MODEL: ${DEFAULT_MODEL:-official}
+      SHELFVISION_PRODUCT_WEIGHTS: ${SHELFVISION_PRODUCT_WEIGHTS:-/models/shelfvision/product_best.pt}
+      SHELFVISION_MISSING_WEIGHTS: ${SHELFVISION_MISSING_WEIGHTS:-/models/shelfvision/missing_best.pt}
+      SHELFVISION_MODEL_VERSION: ${SHELFVISION_MODEL_VERSION:-manifest-v1}
+      EXPERIMENT_REPORT_DIR: ${EXPERIMENT_REPORT_DIR:-/app/training/reports/inference}
       INFERENCE_CONF: ${INFERENCE_CONF:-0.25}
       GAP_AUTO_SCORE: ${GAP_AUTO_SCORE:-0.5}
+      GAP_MODE: ${GAP_MODE:-model}
+      DEVICE: ${DEVICE:-cpu}
       DEFAULT_CONF: ${DEFAULT_CONF:-0.25}
       S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-http://minio:9000}
       S3_BUCKET: ${S3_BUCKET:-inspections}
@@ -22,6 +32,7 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
     volumes:
       - ./modelos:/models:ro
+      - ./training/reports:/app/training/reports
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c",
