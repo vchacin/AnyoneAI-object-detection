@@ -28,11 +28,18 @@ services:
       S3_ACCESS_KEY: ${S3_ACCESS_KEY:-minioadmin}
       S3_SECRET_KEY: ${S3_SECRET_KEY:-minioadmin}
       S3_REGION: ${S3_REGION:-us-east-1}
-      JWT_SECRET: ${JWT_SECRET:-development-only-change-me}
+      JWT_SECRET: ${JWT_SECRET:-development-only-change-me-use-a-real-secret}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      JWT_ACCESS_TTL_MINUTES: ${JWT_ACCESS_TTL_MINUTES:-15}
+      JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-7}
+      MAX_IMAGE_MB: ${MAX_IMAGE_MB:-10}
+      UPLOAD_ROOT: ${UPLOAD_ROOT:-/app/app/data/uploads}
+      COST_PER_HOUR_USD: ${COST_PER_HOUR_USD:-}
+      IMAGES_PER_HOUR_CAPACITY: ${IMAGES_PER_HOUR_CAPACITY:-}
     volumes:
       - ./modelos:/models:ro
       - ./training/reports:/app/training/reports
+      - uploads-data:/app/app/data/uploads
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c",
@@ -68,3 +75,4 @@ services:
 volumes:
   postgres-data:
   minio-data:
+  uploads-data:

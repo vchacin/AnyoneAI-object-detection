@@ -17,10 +17,18 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-# Los pesos son el unico artifact pesado; se montan como volumen en compose.
 ENV MODEL_PATH=/models/best.pt \
-    INFERENCE_WEIGHTS=/models/best.pt
+    INFERENCE_WEIGHTS=/models/best.pt \
+    UPLOAD_ROOT=/app/app/data/uploads
+
+RUN useradd --create-home --uid 10001 appuser \
+ && mkdir -p /app/app/data/uploads \
+ && chown -R appuser:appuser /app
+USER appuser
 
 EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
 
 CMD ["uvicorn", "app.backend.main:app", "--host", "0.0.0.0", "--port", "8000"]

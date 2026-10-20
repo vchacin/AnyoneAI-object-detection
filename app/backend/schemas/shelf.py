@@ -1,1 +1,1 @@
-"""Contratos futuros de estantes y zonas con gap_threshold.""
+"""Contratos futuros de estantes y zonas con gap_threshold."""

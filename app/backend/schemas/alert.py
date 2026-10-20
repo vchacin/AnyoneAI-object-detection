@@ -1,1 +1,1 @@
-"""Contratos futuros de alertas, filtros por estado/severidad y transiciones de ciclo de vida.""
+"""Contratos futuros de alertas, filtros por estado/severidad y transiciones de ciclo de vida."""

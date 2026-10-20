@@ -119,7 +119,129 @@ Con Docker:
 docker compose up --build
 ```
 
+La documentación OpenAPI está disponible en `/docs`. La referencia de rutas
+del backend está en [`docs/API.md`](docs/API.md). La base de datos se prepara
+con:
+
+```bash
+python -m alembic upgrade head
+```
+
+Las imágenes de desarrollo se guardan en `app/data/uploads/`, excluidas del
+control de versiones. En Docker se usan los volúmenes `uploads-data` y
+`postgres-data`.
+
+### 5. Seleccion de modelos y bitacora
+
+La explicacion detallada de diferencias de entrenamiento, pesos y flujo de
+inferencia esta en [`docs/MODEL_COMPARISON.md`](docs/MODEL_COMPARISON.md). El
+analisis de la primera revision humana esta en
+[`docs/REVIEW_ANALYSIS.md`](docs/REVIEW_ANALYSIS.md).
+
+El backend conserva `official` como modelo predeterminado y tambien incluye
+`shelfvision`, el pipeline compuesto entregado por el companero. ShelfVision
+usa dos pesos (`product_best.pt` y `missing_best.pt`), agrupacion geometrica de
+filas, analisis OpenCV y fusion de scores. Los pesos se encuentran en
+`modelos/shelfvision/` y sus hashes corresponden a `MODEL_MANIFEST.json` del
+proyecto de origen.
+
+Consultar modelos disponibles sin cargar pesos:
+
+```bash
+curl http://localhost:8000/api/v1/models
+```
+
+Seleccionar un modelo por solicitud:
+
+```bash
+curl -X POST \
+  -F "image=@C:/ruta/estanteria.jpg" \
+  "http://localhost:8000/api/v1/inference?model=official"
+
+curl -X POST \
+  -F "image=@C:/ruta/estanteria.jpg" \
+  "http://localhost:8000/api/v1/inference?model=shelfvision"
+```
+
+Tambien se puede cambiar el valor predeterminado con `DEFAULT_MODEL`. Los
+modelos se cargan de forma perezosa y la respuesta incluye `model_name`,
+`model_version` y `experiment_id`.
+
+Cada inferencia genera un JSON unico en `training/reports/inference/` con el
+modelo, version, hashes de pesos, parametros, conteos, latencia y dimensiones
+de la imagen. Estos reportes son bitacora operativa; para afirmar que un
+modelo es mejor se deben ejecutar ambos sobre el mismo conjunto de prueba
+etiquetado y comparar precision, recall, mAP, falsos positivos/negativos y
+latencia P50/P95. Una imagen aislada como `001.jpg` sirve como smoke test, no
+como evaluacion estadistica.
+
+#### Comparacion visual sin labels de `missing`
+
+Cuando no hay etiquetas humanas de faltantes, se puede generar una corrida
+para revision manual. El comando toma una muestra aleatoria reproducible,
+ejecuta ambos modelos y guarda dos imagenes anotadas por caso:
+
+```bash
+python training/compare_models.py --count 538 --seed 42
+```
+
+Luego iniciar la API y abrir:
+
+```text
+http://localhost:8000/comparison
+```
+
+La interfaz muestra los resultados lado a lado y permite marcar `Gana oficial`,
+`Gana ShelfVision`, `Empate` o `No claro`, además de una nota. Las respuestas
+se guardan en `app/data/comparisons/<run_id>/reviews.jsonl`; el manifest y las
+imagenes anotadas quedan en la misma corrida. Este procedimiento mide la
+preferencia visual humana sobre las mismas imagenes, pero no sustituye mAP ni
+precision/recall hasta disponer de labels revisados.
+
 ## Uso por CLI (alternativa al notebook)
+
+### Reentrenamiento desde Colab
+
+Para crear una nueva versión después de la revisión visual, abrir
+`training/pipeline_completo.ipynb` y ejecutar las 11 celdas en orden. La
+configuración recomendada parte del checkpoint oficial y conserva el brazo B:
+
+```python
+import os
+os.environ["EXPERIMENT_NAME"] = "B_hard_examples_v1"
+os.environ["INIT_WEIGHTS"] = "modelos/best.pt"
+os.environ["TRAIN_ARM"] = "B"
+os.environ["TRAIN_EPOCHS"] = "50"
+```
+
+Antes de entrenar, añadir al dataset ejemplos etiquetados de las fallas
+observadas: bebidas lejanas, perspectiva, productos pequeños y faltantes fuera
+de margen. `reviews.jsonl` sirve para priorizar imágenes, pero sus veredictos
+no son labels de entrenamiento; las cajas `missing` deben revisarse y marcarse
+manualmente.
+
+Para conservar intactos los labels `object`, exporta desde CVAT, Label Studio
+o Roboflow sólo las cajas `missing` en YOLO (una clase, normalmente id `0`) y
+guárdalas como `data_pipeline/manual_missing/labels/*.txt`. Convierte esas
+cajas al formato usado por el pipeline:
+
+```bash
+python labeling/manual_yolo_to_candidates.py \
+  --images-dir data_pipeline/dataset_sku110k/images \
+  --labels-dir data_pipeline/manual_missing/labels \
+  --out data_pipeline/manual_missing/candidates.csv
+```
+
+Después configura `MANUAL_MISSING_CSV` con ese CSV antes de ejecutar la celda
+7. El pipeline añadirá esas cajas como clase `missing` al brazo B sin borrar ni
+reemplazar ninguna caja `object`.
+
+La última celda genera y descarga un paquete con `best.pt`, `metrics.json`,
+`train_config.json` y `MODEL_MANIFEST.json`. Para probarlo localmente se puede
+copiar el checkpoint a `modelos/experiments/<run_name>/best.pt` y configurarlo
+como `SHELFVISION_*` sólo si corresponde al pipeline ShelfVision; un nuevo
+checkpoint del oficial debe conservar su contrato de clases y reemplazarse de
+forma controlada como `MODEL_PATH`.
 
 ```bash
 # 1. Descargar dataset (organiza automáticamente en images/ y annotations/)
