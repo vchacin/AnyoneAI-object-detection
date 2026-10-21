@@ -3,13 +3,13 @@ from datetime import datetime
 import json
 
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse
 from sqlalchemy.orm import Session
 
 from ..core.deps import get_current_user, require_role, require_store_access
 from ..db import models
 from ..db.session import get_session
-from ..services.storage_service import delete, path_for
+from ..services.storage_service import delete, path_for, presign
 
 router = APIRouter(tags=["inspections"])
 
@@ -104,8 +104,11 @@ def get_inspection_image(inspection_id: str, session: Session = Depends(get_sess
     inspection = _inspection_or_404(inspection_id, session, user)
     if not inspection.image_key:
         raise HTTPException(404, detail={"detail": "Imagen no disponible", "code": "IMAGE_NOT_FOUND"})
+    url = presign(inspection.image_key)
+    if url:
+        return RedirectResponse(url)
     path = path_for(inspection.image_key)
-    if not path.is_file():
+    if not path or not path.is_file():
         raise HTTPException(404, detail={"detail": "Imagen no disponible", "code": "IMAGE_NOT_FOUND"})
     return FileResponse(path)
 
