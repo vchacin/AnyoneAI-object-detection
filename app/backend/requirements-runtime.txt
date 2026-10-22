@@ -1,0 +1,22 @@
+# API
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+pydantic>=2.6
+pydantic-settings>=2.2
+
+# Persistence and security
+sqlalchemy>=2.0
+psycopg2-binary>=2.9
+alembic>=1.13
+PyJWT>=2.8
+
+# CPU inference and image processing
+opencv-python-headless>=4.9
+numpy>=1.26
+pillow>=10.0
+pyyaml>=6.0
+ultralytics>=8.3.0
+
+# Optional S3/MinIO storage
+boto3>=1.34

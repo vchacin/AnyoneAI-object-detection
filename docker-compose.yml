@@ -17,7 +17,7 @@ services:
       SHELFVISION_PRODUCT_WEIGHTS: ${SHELFVISION_PRODUCT_WEIGHTS:-/models/shelfvision/product_best.pt}
       SHELFVISION_MISSING_WEIGHTS: ${SHELFVISION_MISSING_WEIGHTS:-/models/shelfvision/missing_best.pt}
       SHELFVISION_MODEL_VERSION: ${SHELFVISION_MODEL_VERSION:-manifest-v1}
-      EXPERIMENT_REPORT_DIR: ${EXPERIMENT_REPORT_DIR:-/app/training/reports/inference}
+      EXPERIMENT_REPORT_DIR: ${EXPERIMENT_REPORT_DIR:-/app/app/data/reports/inference}
       INFERENCE_CONF: ${INFERENCE_CONF:-0.25}
       GAP_AUTO_SCORE: ${GAP_AUTO_SCORE:-0.5}
       GAP_MODE: ${GAP_MODE:-model}
@@ -38,7 +38,7 @@ services:
       IMAGES_PER_HOUR_CAPACITY: ${IMAGES_PER_HOUR_CAPACITY:-}
     volumes:
       - ./modelos:/models:ro
-      - ./training/reports:/app/training/reports
+      - ./training/reports:/app/app/data/reports
       - uploads-data:/app/app/data/uploads
     restart: unless-stopped
     healthcheck:

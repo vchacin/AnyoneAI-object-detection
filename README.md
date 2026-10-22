@@ -46,6 +46,7 @@ entre el etiquetado offline y el serving.
 │
 ├── docker-compose.yml
 ├── requirements.txt
+├── app/backend/requirements-runtime.txt
 └── .env.example
 ```
 
@@ -119,6 +120,50 @@ Con Docker:
 docker compose up --build
 ```
 
+Para la imagen de producción CPU-only, sin dependencias de entrenamiento ni
+CUDA:
+
+```bash
+docker build -t backend-prod:latest -f app/backend/Dockerfile .
+docker run -d --name backend-prod \
+  --memory=1g --cpus=1 -p 8000:8000 \
+  -v "${PWD}/modelos:/models:ro" \
+  backend-prod:latest
+```
+
+En PowerShell:
+
+```powershell
+docker build -t backend-prod:latest -f app\backend\Dockerfile .
+docker run -d --name backend-prod `
+  --memory=1g --cpus=1 -p 8000:8000 `
+  -v "${PWD}\modelos:/models:ro" `
+  backend-prod:latest
+```
+
+La imagen no contiene los pesos `.pt`/`.onnx`; deben montarse en `/models`.
+El contenedor usa un único worker y PyTorch CPU. Verificación rápida:
+
+```bash
+docker images backend-prod:latest
+curl -s http://localhost:8000/health
+docker stats backend-prod --no-stream
+```
+
+La prueba de inferencia requiere una imagen local:
+
+```bash
+curl -X POST "http://localhost:8000/api/v1/inference" \
+  -H "accept: application/json" \
+  -F "file=@ruta/a/estanteria.jpg"
+```
+
+Para detener y eliminar el contenedor de prueba:
+
+```bash
+docker rm -f backend-prod
+```
+
 La documentación OpenAPI está disponible en `/docs`. La referencia de rutas
 del backend está en [`docs/API.md`](docs/API.md). La base de datos se prepara
 con:
@@ -128,8 +173,34 @@ python -m alembic upgrade head
 ```
 
 Las imágenes de desarrollo se guardan en `app/data/uploads/`, excluidas del
-control de versiones. En Docker se usan los volúmenes `uploads-data` y
-`postgres-data`.
+control de versiones. En Docker se usan los volúmenes `uploads-data`,
+`postgres-data` y, opcionalmente, `minio-data`. Los reportes runtime se
+guardan en `/app/app/data/reports/inference`.
+
+### 5. Runtime y desarrollo
+
+`requirements.txt` conserva las dependencias completas para entrenamiento,
+análisis y pruebas. La imagen de producción instala únicamente
+`app/backend/requirements-runtime.txt`; excluye `pandas`, `matplotlib`,
+`tqdm`, `pytest` y `httpx`.
+
+La imagen runtime está optimizada para CPU:
+
+```text
+backend-prod:latest  ~2.46 GB
+PyTorch              CPU-only
+CUDA                 deshabilitado
+```
+
+Para liberar caché de construcción sin eliminar volúmenes:
+
+```bash
+docker builder prune -f
+docker container prune -f
+```
+
+No ejecutar `docker system prune --volumes` en un entorno con datos
+persistentes.
 
 ### 5. Seleccion de modelos y bitacora
 
