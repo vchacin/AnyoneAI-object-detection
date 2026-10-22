@@ -43,3 +43,9 @@ Thumbs.db
 # Colab
 *.ipynb_checkpoints
 /content/
+
+# Documentación (se actualiza manualmente, no se versiona automáticamente)
+docs/
+
+# Archivos de prueba temporales
+test_e2e.py

@@ -10,13 +10,15 @@ from ..core.config import get_settings
 settings = get_settings()
 
 ROOT = Path(__file__).resolve().parents[3]
-UPLOAD_ROOT = Path(os.environ.get("UPLOAD_ROOT", ROOT / "app" / "data" / "uploads"))
+UPLOAD_ROOT = Path(settings.upload_root)
 
-STORAGE_BACKEND = os.environ.get("STORAGE_BACKEND", "local").lower()
-S3_BUCKET = os.environ.get("S3_BUCKET", "")
-AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
-PRESIGNED_TTL_S = int(os.environ.get("PRESIGNED_TTL_S", "300"))
-S3_ENDPOINT_URL = os.environ.get("S3_ENDPOINT_URL")
+STORAGE_BACKEND = settings.storage_backend.lower()
+S3_BUCKET = settings.s3_bucket
+AWS_REGION = settings.s3_region
+PRESIGNED_TTL_S = settings.presigned_url_ttl_seconds
+S3_ENDPOINT_URL = settings.s3_endpoint_url
+S3_ACCESS_KEY = settings.s3_access_key
+S3_SECRET_KEY = settings.s3_secret_key
 
 
 def _key(store_id: str, extension: str) -> str:
@@ -35,6 +37,9 @@ def _s3_client():
     kwargs = {"region_name": AWS_REGION}
     if S3_ENDPOINT_URL:
         kwargs["endpoint_url"] = S3_ENDPOINT_URL
+    if S3_ACCESS_KEY and S3_SECRET_KEY:
+        kwargs["aws_access_key_id"] = S3_ACCESS_KEY
+        kwargs["aws_secret_access_key"] = S3_SECRET_KEY
     return boto3.client("s3", **kwargs)
 
 
