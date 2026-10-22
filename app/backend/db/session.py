@@ -15,6 +15,11 @@ DEFAULT_DB = ROOT / "app" / "data" / "detections.db"
 DATABASE_URL = settings.database_url
 if DATABASE_URL == "sqlite:///./app/data/detections.db":
     DATABASE_URL = f"sqlite:///{DEFAULT_DB}"
+# Normalise plain postgresql:// to the psycopg2 driver (installed as
+# psycopg2-binary). SQLAlchemy 2.x defaults to the psycopg (v3) driver when no
+# driver is specified, which is not in the runtime requirements.
+if DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
 
 Base = declarative_base()
 
