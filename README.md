@@ -108,10 +108,14 @@ automáticamente. Las credenciales AWS se leen de `.env` en la raíz del reposit
 ### 4. API
 
 ```bash
-uvicorn app.backend.main:app --reload
+# Con SQLite local (sin PostgreSQL externo, ideal para pruebas rápidas):
+DATABASE_URL=sqlite:///./app/data/detections.db uvicorn app.backend.main:app --reload
 # http://localhost:8000                 interfaz web
 # http://localhost:8000/api/v1/health   estado del servicio
 # http://localhost:8000/docs            OpenAPI / Swagger
+
+# Con PostgreSQL (Neon o local):
+uvicorn app.backend.main:app --reload
 ```
 
 Con Docker:

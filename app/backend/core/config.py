@@ -2,7 +2,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import AliasChoices, Field
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -48,6 +48,13 @@ class Settings(BaseSettings):
     # --- Analytics / inference ---------------------------------------------
     cost_per_hour_usd: float | None = None
     images_per_hour_capacity: int | None = None
+
+    @field_validator("cost_per_hour_usd", "images_per_hour_capacity", mode="before")
+    @classmethod
+    def _empty_to_none(cls, value):
+        if value == "" or value is None:
+            return None
+        return value
     experiment_report_dir: str = str(ROOT / "training" / "reports" / "inference")
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", case_sensitive=False)
