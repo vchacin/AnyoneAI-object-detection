@@ -272,7 +272,7 @@ def predict(
             raise HTTPException(404, detail={"detail": "Camara no encontrada", "code": "NOT_FOUND"})
         camera_id = camera.id
         shelf_id = shelf_id or camera.shelf_id
-    # Un super_admin no tiene tienda propia: puede indicar en cual guardar la inspeccion.
+    # A super_admin has no own store; they may specify which store to persist the inspection.
     scope_store_id = principal_user.store_id if principal_user else None
     if principal_user and principal_user.role == "super_admin" and store_id:
         if not session.get(models.Store, store_id):
