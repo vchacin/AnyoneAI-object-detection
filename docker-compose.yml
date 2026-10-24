@@ -7,6 +7,8 @@ services:
       - "8000:8000"
     environment:
       API_KEY: ${API_KEY:-}
+      FIRST_SUPERADMIN_EMAIL: ${FIRST_SUPERADMIN_EMAIL:-}
+      FIRST_SUPERADMIN_PASSWORD: ${FIRST_SUPERADMIN_PASSWORD:-}
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://postgres:postgres@db:5432/object_detection}
       MODEL_MANIFEST: ${MODEL_MANIFEST:-/app/modelos/manifest.json}
       MODEL_ROOT: ${MODEL_ROOT:-/models}

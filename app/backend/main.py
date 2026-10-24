@@ -224,7 +224,7 @@ def health() -> HealthResponse:
 
 
 @app.get("/api/v1/models")
-def models():
+def list_models():
     """Lists configured models without loading their weights."""
     return {
         "default_model": active_model_name(),
@@ -241,6 +241,7 @@ def predict(
     model: str | None = None,
     camera_id: str | None = Form(default=None),
     shelf_id: str | None = Form(default=None),
+    store_id: str | None = Form(default=None),
     conf: float | None = Form(default=None),
     persist: bool = True,
     session: Session = Depends(db.get_session),
@@ -271,14 +272,20 @@ def predict(
             raise HTTPException(404, detail={"detail": "Camara no encontrada", "code": "NOT_FOUND"})
         camera_id = camera.id
         shelf_id = shelf_id or camera.shelf_id
+    # Un super_admin no tiene tienda propia: puede indicar en cual guardar la inspeccion.
+    scope_store_id = principal_user.store_id if principal_user else None
+    if principal_user and principal_user.role == "super_admin" and store_id:
+        if not session.get(models.Store, store_id):
+            raise HTTPException(404, detail={"detail": "Tienda no encontrada", "code": "NOT_FOUND"})
+        scope_store_id = store_id
     if principal_user and camera_id:
         linked_camera = session.query(models.Camera).filter(
-            models.Camera.id == camera_id, models.Camera.store_id == principal_user.store_id).first()
+            models.Camera.id == camera_id, models.Camera.store_id == scope_store_id).first()
         if not linked_camera:
             raise HTTPException(404, detail={"detail": "Camara no encontrada", "code": "NOT_FOUND"})
     if principal_user and shelf_id:
         linked_shelf = session.query(models.Shelf).filter(
-            models.Shelf.id == shelf_id, models.Shelf.store_id == principal_user.store_id).first()
+            models.Shelf.id == shelf_id, models.Shelf.store_id == scope_store_id).first()
         if not linked_shelf:
             raise HTTPException(404, detail={"detail": "Estante no encontrado", "code": "NOT_FOUND"})
     upload = image or file
@@ -358,7 +365,7 @@ def predict(
         except Exception as exc:  # noqa: BLE001 - persistencia no bloquea la prediccion
             session.rollback()
             logger.warning("No se pudo guardar la deteccion: %s", exc)
-        store_id = camera.store_id if camera else principal_user.store_id if principal_user else None
+        store_id = camera.store_id if camera else scope_store_id
         if store_id:
             extension = ".jpg" if is_jpeg else ".png"
             image_key = store_image(raw, store_id=store_id, extension=extension)
@@ -390,7 +397,7 @@ def predict(
     if principal_user:
         record_action(session, actor_id=principal_user.id, action="inference",
                       entity="inspection", entity_id=inspection_id,
-                      store_id=principal_user.store_id,
+                      store_id=scope_store_id,
                       details={"camera_id": camera_id, "shelf_id": shelf_id})
         session.commit()
 
