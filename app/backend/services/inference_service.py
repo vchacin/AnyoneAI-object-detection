@@ -136,6 +136,10 @@ class Detector:
                 confidences = boxes.conf.cpu().numpy().tolist()
                 for box, class_id, confidence in zip(xyxy, classes, confidences):
                     class_name = str(names[int(class_id)]).lower()
+                    # Normalise alias class names (e.g. "missing1") to the
+                    # canonical "missing" label used by the backend and frontend.
+                    if class_name == "missing1":
+                        class_name = "missing"
                     record = _box_record(box, confidence, class_name, "model")
                     if class_name == "missing":
                         model_missing.append(record)
