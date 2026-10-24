@@ -7,8 +7,8 @@ services:
       - "8000:8000"
     environment:
       API_KEY: ${API_KEY:-}
-      FIRST_SUPERADMIN_EMAIL: ${FIRST_SUPERADMIN_EMAIL:-}
-      FIRST_SUPERADMIN_PASSWORD: ${FIRST_SUPERADMIN_PASSWORD:-}
+      FIRST_SUPERADMIN_EMAIL: ${FIRST_SUPERADMIN_EMAIL:-admin@shelfvision.com}
+      FIRST_SUPERADMIN_PASSWORD: ${FIRST_SUPERADMIN_PASSWORD:-Admin123!}
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://postgres:postgres@db:5432/object_detection}
       MODEL_MANIFEST: ${MODEL_MANIFEST:-/app/modelos/manifest.json}
       MODEL_ROOT: ${MODEL_ROOT:-/models}
@@ -34,7 +34,6 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
       JWT_ACCESS_TTL_MINUTES: ${JWT_ACCESS_TTL_MINUTES:-15}
       JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-7}
-      MAX_IMAGE_MB: ${MAX_IMAGE_MB:-10}
       UPLOAD_ROOT: ${UPLOAD_ROOT:-/app/app/data/uploads}
       COST_PER_HOUR_USD: ${COST_PER_HOUR_USD:-}
       IMAGES_PER_HOUR_CAPACITY: ${IMAGES_PER_HOUR_CAPACITY:-}
