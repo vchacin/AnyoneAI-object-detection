@@ -1,0 +1,28 @@
+{
+  "source_model": "yolo26m-auto-120ep",
+  "source_checkpoint_sha256": "b7423f4effd144e7d640493e509b20c728afc598aca055dcb954cba3469f0009",
+  "onnx_sha256": "b60ffe31c230d16f307e0041a02d0a572617a66493338bafdadc214275bbdb5a",
+  "imgsz": 1280,
+  "max_det": 700,
+  "iou": 0.7,
+  "default_conf": 0.25,
+  "classes": [
+    "object",
+    "missing"
+  ],
+  "output_format": "raw_xywh",
+  "input_shape": [
+    1,
+    3,
+    1280,
+    1280
+  ],
+  "output_shape": [
+    1,
+    6,
+    33600
+  ],
+  "ultralytics_version": "8.4.184",
+  "torch_version": "2.5.1+cpu",
+  "onnx_version": "1.19.1"
+}

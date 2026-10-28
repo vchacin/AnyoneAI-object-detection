@@ -1,0 +1,5 @@
+ultralytics==8.4.184
+onnx==1.19.1
+torch==2.5.1
+torchvision==0.20.1
+onnxruntime>=1.19,<2

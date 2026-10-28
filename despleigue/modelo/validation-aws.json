@@ -1,0 +1,24 @@
+{
+  "scope": "AWS deployment smoke test; synthetic input; no application inspection inserted",
+  "region": "us-east-2",
+  "url": "https://shelfvision.3.19.7.3.sslip.io/login",
+  "date": "2026-10-25",
+  "model": "yolo26m-auto-120ep",
+  "image_digest": "sha256:91d33779a0378716c0d4808f644a72f2a671f7d93101e2c7ca97c83f423f33ef",
+  "lambda_memory_mb": 3008,
+  "imgsz": 1280,
+  "max_det": 700,
+  "https_login_status": 200,
+  "anonymous_api_status": 401,
+  "lambda_inference_ok": true,
+  "ec2_to_lambda_ok": true,
+  "s3_read_write_delete_ok": true,
+  "temporary_s3_object_removed": true,
+  "preserved_neon_counts": {
+    "users": 3,
+    "stores": 1,
+    "inspections": 9
+  },
+  "historical_image_files": "Not found in the previous local uploads volume; not migrated",
+  "terraform_final_plan": "No changes"
+}

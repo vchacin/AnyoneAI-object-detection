@@ -1,0 +1,1 @@
+"""Contrato futuro de POST /api/v1/inference: imagen, detecciones, resumen, model_version, bbox y alerta."""

@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "ok": true,
+    "model_name": "active",
+    "model_version": "b60ffe31c230d16f307e0041a02d0a572617a66493338bafdadc214275bbdb5a",
+    "model_sha256": "b60ffe31c230d16f307e0041a02d0a572617a66493338bafdadc214275bbdb5a",
+    "available": true,
+    "imgsz": 1280,
+    "max_det": 700,
+    "default_conf": 0.25,
+    "classes": [
+      "object",
+      "missing"
+    ],
+    "source_model": "yolo26m-auto-120ep",
+    "source_checkpoint_sha256": "b7423f4effd144e7d640493e509b20c728afc598aca055dcb954cba3469f0009"
+  },
+  "cpu_limit": 2,
+  "scope": "Local Lambda Runtime Interface Emulator; not AWS latency",
+  "read_only_root": true,
+  "calls": [
+    {
+      "conf": 0.25,
+      "request_ms": 2617,
+      "handler_ms": 2585,
+      "counts_by_class": {
+        "object": 85,
+        "missing": 1
+      },
+      "count": 86
+    },
+    {
+      "conf": 0.25,
+      "request_ms": 2223,
+      "handler_ms": 2200,
+      "counts_by_class": {
+        "object": 85,
+        "missing": 1
+      },
+      "count": 86
+    },
+    {
+      "conf": 0.1,
+      "request_ms": 1854,
+      "handler_ms": 1827,
+      "counts_by_class": {
+        "object": 178,
+        "missing": 1
+      },
+      "count": 179
+    },
+    {
+      "conf": 0.5,
+      "request_ms": 1947,
+      "handler_ms": 1931,
+      "counts_by_class": {
+        "object": 38,
+        "missing": 0
+      },
+      "count": 38
+    }
+  ],
+  "memory_limit_mb": 3072,
+  "memory_snapshot": "1.426GiB / 3GiB"
+}

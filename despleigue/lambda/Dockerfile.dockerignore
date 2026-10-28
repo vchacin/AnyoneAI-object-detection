@@ -1,0 +1,7 @@
+**
+!lambda/
+!lambda/requirements.txt
+!lambda/lambda_function.py
+!modelo/
+!modelo/model-dynamic.onnx
+!modelo/model-dynamic.json

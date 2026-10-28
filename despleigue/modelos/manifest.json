@@ -1,0 +1,14 @@
+{
+  "active": "official",
+  "models": {
+    "official": {
+      "path": "modelos/yolo26m-auto-120ep.pt",
+      "imgsz": 1280,
+      "max_det": 700,
+      "default_conf": 0.25,
+      "classes": { "0": "object", "1": "missing" },
+      "sha256": "b7423f4effd144e7d640493e509b20c728afc598aca055dcb954cba3469f0009",
+      "source": "yolo26m-auto-120ep"
+    }
+  }
+}

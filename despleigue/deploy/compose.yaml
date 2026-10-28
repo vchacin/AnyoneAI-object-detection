@@ -1,0 +1,52 @@
+name: shelfvision
+services:
+  backend:
+    image: ${BACKEND_IMAGE:?Configurar BACKEND_IMAGE por digest ECR}
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: production
+      INFERENCE_BACKEND: lambda
+      AWS_REGION: ${AWS_REGION:?Configurar AWS_REGION}
+      LAMBDA_FUNCTION_NAME: ${LAMBDA_FUNCTION_NAME:?Configurar LAMBDA_FUNCTION_NAME}
+      LAMBDA_READ_TIMEOUT_SECONDS: ${LAMBDA_READ_TIMEOUT_SECONDS:-70}
+      APP_SECRET_ARN: ${APP_SECRET_ARN:?Configurar APP_SECRET_ARN}
+      STORAGE_BACKEND: s3
+      S3_BUCKET: ${S3_BUCKET:?Configurar S3_BUCKET}
+      MAX_UPLOAD_MB: "4"
+      ENABLE_DOCS: "false"
+      EXPERIMENT_REPORT_DIR: /app/app/data/reports/inference
+    volumes:
+      - reports:/app/app/data/reports
+      - demo_config:/app/app/data/config
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+  frontend:
+    image: ${FRONTEND_IMAGE:?Configurar FRONTEND_IMAGE por digest ECR}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    logging: *logging
+  proxy:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?Configurar dominio con DNS a EC2}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+    logging: *logging
+volumes:
+  demo_config:
+  reports:
+  caddy_data:
+  caddy_config:

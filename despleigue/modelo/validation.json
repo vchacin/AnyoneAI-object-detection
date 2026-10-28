@@ -1,0 +1,70 @@
+{
+  "scope": "Local equivalence check, not accuracy evaluation or AWS benchmark",
+  "onnxruntime": "1.19.2",
+  "metadata": {
+    "ok": true,
+    "model_name": "active",
+    "model_version": "b60ffe31c230d16f307e0041a02d0a572617a66493338bafdadc214275bbdb5a",
+    "model_sha256": "b60ffe31c230d16f307e0041a02d0a572617a66493338bafdadc214275bbdb5a",
+    "available": true,
+    "imgsz": 1280,
+    "max_det": 700,
+    "default_conf": 0.25,
+    "classes": [
+      "object",
+      "missing"
+    ],
+    "source_model": "yolo26m-auto-120ep",
+    "source_checkpoint_sha256": "b7423f4effd144e7d640493e509b20c728afc598aca055dcb954cba3469f0009"
+  },
+  "images": [
+    {
+      "image": "1.jpg",
+      "reference_count": 59,
+      "onnx_count": 59,
+      "counts_by_class": {
+        "object": 59,
+        "missing": 0
+      },
+      "onnx_call_ms": 2325,
+      "max_coordinate_delta_px": 1.0,
+      "max_confidence_delta": 0.000495
+    },
+    {
+      "image": "2.jpg",
+      "reference_count": 3,
+      "onnx_count": 3,
+      "counts_by_class": {
+        "object": 3,
+        "missing": 0
+      },
+      "onnx_call_ms": 2006,
+      "max_coordinate_delta_px": 0.521717,
+      "max_confidence_delta": 0.000484
+    },
+    {
+      "image": "11.jpg",
+      "reference_count": 86,
+      "onnx_count": 86,
+      "counts_by_class": {
+        "object": 85,
+        "missing": 1
+      },
+      "onnx_call_ms": 1863,
+      "max_coordinate_delta_px": 1.0,
+      "max_confidence_delta": 0.00049
+    }
+  ],
+  "backend_adapter": [
+    {
+      "conf": 0.1,
+      "count": 179,
+      "model_version": "b60ffe31c230d16f307e0041a02d0a572617a66493338bafdadc214275bbdb5a"
+    },
+    {
+      "conf": 0.5,
+      "count": 38,
+      "model_version": "b60ffe31c230d16f307e0041a02d0a572617a66493338bafdadc214275bbdb5a"
+    }
+  ]
+}

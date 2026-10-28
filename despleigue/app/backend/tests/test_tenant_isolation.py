@@ -1,0 +1,1 @@
+"""Placeholder tests for store_id isolation and the permission matrix."""

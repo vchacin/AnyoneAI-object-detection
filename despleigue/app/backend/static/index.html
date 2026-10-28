@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AnyoneAI · Detección de producto faltante</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2rem 1.5rem;
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: #0f1115; color: #e6e8ec;
+  }
+  main { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; margin: 0 0 .25rem; }
+  p.sub { color: #8b93a1; margin: 0 0 1.75rem; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  @media (max-width: 820px) { .row { grid-template-columns: 1fr; } }
+  .card {
+    background: #161a21; border: 1px solid #232a34; border-radius: 10px;
+    padding: 1.1rem 1.25rem;
+  }
+  h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em;
+       color: #8b93a1; margin: 0 0 .9rem; font-weight: 600; }
+  input[type=file] { width: 100%; color: #8b93a1; }
+  input[type=text] { width: 100%; background: #0f1115; color: #e6e8ec;
+    border: 1px solid #232a34; border-radius: 6px; padding: .5rem .6rem; }
+  label { display: block; font-size: .78rem; color: #8b93a1; margin: 0 0 .3rem; }
+  button {
+    margin-top: 1rem; width: 100%; padding: .6rem; border: 0; border-radius: 6px;
+    background: #4f7cff; color: #fff; font-weight: 600; cursor: pointer;
+  }
+  button:disabled { opacity: .5; cursor: progress; }
+  canvas, .placeholder {
+    width: 100%; border-radius: 8px; background: #0b0d11; min-height: 260px;
+    display: block;
+  }
+  .placeholder { display: grid; place-items: center; color: #4a5361; }
+  .stats { display: flex; gap: 1.5rem; margin-top: 1rem; }
+  .stat b { display: block; font-size: 1.5rem; }
+  .stat span { font-size: .72rem; color: #8b93a1; text-transform: uppercase;
+               letter-spacing: .06em; }
+  pre { background: #0b0d11; border: 1px solid #232a34; border-radius: 8px;
+        padding: .8rem; overflow: auto; max-height: 320px; font-size: .78rem; }
+  .err { color: #ff8080; }
+  .legend { font-size: .78rem; color: #8b93a1; margin-top: .6rem; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px;
+              margin-right: .3rem; vertical-align: -1px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>AnyoneAI · Detección de producto faltante</h1>
+  <p class="sub">Sube una foto de una estantería. Verde: productos detectados.
+     Naranja: huecos con score sobre el umbral. Rojo: candidatos descartados.</p>
+
+  <div class="row">
+    <div class="card">
+      <h2>Enviar imagen</h2>
+      <label for="file">Fotografía de la estantería (JPG/PNG)</label>
+      <input type="file" id="file" accept="image/*">
+      <label for="key" style="margin-top:.9rem">API key (si el servidor la exige)</label>
+      <input type="text" id="key" placeholder="X-API-Key">
+      <button id="go">Detectar</button>
+      <div class="legend">
+        <i style="background:#00c838"></i>producto &nbsp;
+        <i style="background:#ff8c00"></i>hueco aceptado &nbsp;
+        <i style="background:#c83232"></i>candidato
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Resultado</h2>
+      <div class="placeholder" id="ph">Sin imagen</div>
+      <canvas id="cv" hidden></canvas>
+      <div class="stats">
+        <div class="stat"><b id="nobj">–</b><span>productos</span></div>
+        <div class="stat"><b id="nmiss">–</b><span>huecos</span></div>
+        <div class="stat"><b id="conf">–</b><span>confianza</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1.25rem">
+    <h2>Respuesta JSON</h2>
+    <pre id="out">—</pre>
+  </div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+function draw(img, result) {
+  const cv = $("cv"), ctx = cv.getContext("2d");
+  const scale = Math.min(1, 1200 / img.width);
+  cv.width = Math.round(img.width * scale);
+  cv.height = Math.round(img.height * scale);
+  ctx.drawImage(img, 0, 0, cv.width, cv.height);
+  ctx.lineWidth = 2;
+  const k = (n) => n * scale;
+
+  ctx.strokeStyle = "#00c838";
+  for (const b of result.objects) ctx.strokeRect(k(b[0]), k(b[1]), k(b[2]-b[0]), k(b[3]-b[1]));
+
+  for (const c of result.candidates) {
+    ctx.strokeStyle = c.auto ? "#ff8c00" : "#c83232";
+    const b = c.box;
+    ctx.strokeRect(k(b[0]), k(b[1]), k(b[2]-b[0]), k(b[3]-b[1]));
+    ctx.fillStyle = ctx.strokeStyle;
+    ctx.font = "12px system-ui";
+    ctx.fillText(c.score.toFixed(2), k(b[0]), Math.max(12, k(b[1]) - 4));
+  }
+  $("ph").hidden = true; cv.hidden = false;
+}
+
+$("go").addEventListener("click", async () => {
+  const file = $("file").files[0];
+  if (!file) return alert("Elige una imagen primero.");
+  const btn = $("go"); btn.disabled = true; $("out").textContent = "Analizando…";
+
+  const body = new FormData(); body.append("file", file);
+  const key = $("key").value.trim();
+  if (key) body.append("persist", "true");
+
+  try {
+    const res = await fetch("/predict", { method: "POST", body, headers: key ? {"X-API-Key": key} : {} });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || res.statusText);
+
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    await img.decode();
+    draw(img, data);
+
+    $("nobj").textContent = data.n_objects;
+    $("nmiss").textContent = data.n_missing;
+    $("conf").textContent = data.conf.toFixed(2);
+    $("out").classList.remove("err");
+    $("out").textContent = JSON.stringify(data, null, 2);
+    URL.revokeObjectURL(img.src);
+  } catch (err) {
+    $("out").classList.add("err");
+    $("out").textContent = "Error: " + err.message;
+  } finally {
+    btn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

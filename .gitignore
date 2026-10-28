@@ -1,0 +1,56 @@
+# Ignore rules for the deployment folder
+/despleigue/.terraform/
+/despleigue/**/*.tfstate
+/despleigue/**/*.tfstate.*
+/despleigue/**/*.tfplan
+/despleigue/**/*.tfvars
+!/despleigue/**/*.tfvars.example
+/despleigue/**/*.auto.tfvars
+/despleigue/**/*.auto.tfvars.json
+/despleigue/**/*.tsbuildinfo
+/despleigue/**/__pycache__/
+/despleigue/**/.pytest_cache/
+/despleigue/**/.venv/
+/despleigue/**/venv/
+/despleigue/.venv-model/
+
+# Model weights stay out of Git; provide them separately to deployment
+/despleigue/**/*.onnx
+/despleigue/**/*.pt
+/despleigue/**/*.pth
+
+# Secrets, credentials and local cloud configuration
+/despleigue/**/.env*
+!/despleigue/**/.env.example
+!/despleigue/**/.env.*.example
+/despleigue/**/secret.json
+/despleigue/.tools/
+/despleigue/**/.aws/
+/despleigue/**/credentials
+/despleigue/**/credentials.*
+/despleigue/**/*.pem
+/despleigue/**/*.key
+/despleigue/**/*.p12
+/despleigue/**/*.pfx
+/despleigue/**/id_rsa*
+/despleigue/**/id_ed25519*
+
+# Runtime data, logs and generated output
+/despleigue/**/*.log
+/despleigue/**/.playwright-mcp/
+/despleigue/app/data/
+/despleigue/**/*.db
+/despleigue/**/*.sqlite
+/despleigue/**/*.sqlite3
+/despleigue/**/*.dump
+/despleigue/**/*.sql.gz
+/despleigue/**/crash.*.log
+/despleigue/**/node_modules/
+/despleigue/**/.next/
+/despleigue/**/coverage/
+/despleigue/**/.DS_Store
+/despleigue/**/*.egg-info/
+/despleigue/.tmp-export/
+/despleigue/training/reports/
+/despleigue/training/runs/
+/despleigue/training/weights/

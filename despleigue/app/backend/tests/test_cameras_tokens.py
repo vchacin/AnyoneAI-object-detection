@@ -1,0 +1,1 @@
+"""Placeholder tests for camera token visibility, hashing, rotation and revocation."""

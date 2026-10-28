@@ -1,0 +1,11 @@
+{
+  "authenticated": true,
+  "detection_count": 86,
+  "source_model": "yolo26m-auto-120ep",
+  "n_missing": 1,
+  "conf": 0.25,
+  "n_objects": 85,
+  "scope": "Local FastAPI + boto3 Invoke HTTP + Lambda Runtime Interface Emulator; no AWS/Neon",
+  "request_ms": 2551,
+  "model_version": "b60ffe31c230d16f307e0041a02d0a572617a66493338bafdadc214275bbdb5a"
+}
